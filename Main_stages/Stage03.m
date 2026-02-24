@@ -7,18 +7,18 @@ clc;
 %Output: resAv4-L2.mat
 
 %% User specified region
-% Option 1: process a specified experiment:
-EXP='G:\RdnaA-seqAR-atc 1to3-M30 medium 20260130';int=3;WinK=3;WinL=10;%
-Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL);
+% Option 1: process a specified experiment
+% EXP='F:\RdnaA-seqAR-atc 1to3-M30 medium 20260130';int=3;WinK=3;WinL=10;%
+% Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL);
 
 % Option 2: process a list of experiments
-% WinK=4;WinL=3;
-% load('G:\mChrRpath.mat');
-% path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
-% int=cell2mat(Rpath(:,3));
-% for i=3:length(path)%for each experiment
-%     Stg3Neo_outs_with_closest_LdCore(path{i},int(i),WinK,WinL);
-% end
+WinK=4;WinL=3;
+load('G:\mChrRpath.mat');
+path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
+int=cell2mat(Rpath(:,3));
+for i=1:length(path)%for each experiment
+    Stg3Neo_outs_with_closest_LdCore(path{i},int(i),WinK,WinL);
+end
 
 %% Core function starts here.
 function []=Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL)
@@ -56,58 +56,30 @@ if stEntry~=1
 end
 
 outA=cell(size(data,1),1);
-outB=cell(size(data,1),1);
-outC=cell(size(data,1),1);
-outD1=cell(size(data,1),1);
-outD2=cell(size(data,1),1);
-outE1=cell(size(data,1),1);
-outE2=cell(size(data,1),1);
-outF=cell(size(data,1),1);
+outAData=cell(size(data,1),1);
 outGHI=cell(size(data,1),1);
-outGHI2=cell(size(data,1),1);
-outJ1=cell(size(data,1),1);
-outJ1C=cell(size(data,1),1);%<----each entry is a cell
-outJ2=cell(size(data,1),1);
-outJ3=cell(size(data,1),1);
-outK=cell(size(data,1),1);
-outL1=cell(size(data,1),1);
-outL2=cell(size(data,1),1);
+outGHIData=cell(size(data,1),1);
 nAll=num2str(size(data,1));%str format
 parfor i=1:size(data,1)%parfor each entry
     MPath=[EXP,'\M_res\p',num2str(data(i,1),'%0.2i'),'_lkgM.mat'];
     FPath=[EXP,'\Y_res\p',num2str(data(i,1),'%0.2i'),'_lkgY.mat'];
     disp(['Processing ',num2str(Entry(i)),'/',nAll]);
     try
-        [outA{i},outB{i},outC{i},outD1{i},outD2{i},outE1{i},outE2{i},outF{i},outGHI{i},outGHI2{i},outJ1{i},outJ1C{i},outJ2{i},outJ3{i},outK{i},outL1{i},outL2{i}]=genResult0611(MPath,FPath,data(i,:),mappingMethod,round(Cperiod/int),int,minIDT,WinK,WinL);
+        [outA{i},outAData{i},outGHI{i},outGHIData{i}]=genResult0611(MPath,FPath,data(i,:),mappingMethod,round(Cperiod/int),int,minIDT,WinK,WinL);
     catch
         disp(['P',num2str(data(i,1),'%0.2i'),'S',num2str(data(i,2),'%0.2i')]);
     end
 end
-
 outA=cat(1,outA{:});
-outB=cat(1,outB{:});
-outC=cat(1,outC{:});
-outD1=cat(1,outD1{:});
-outD2=cat(1,outD2{:});
-outE1=cat(1,outE1{:});
-outE2=cat(1,outE2{:});
-outF=cat(1,outF{:});
+outAData=cat(1,outAData{:});
 outGHI=cat(1,outGHI{:});
-delInd=cellfun(@(x) isempty(x), outGHI2);outGHI2(delInd)=[];
-outGHI2=cat(1,outGHI2{:});
-outJ1=cat(1,outJ1{:});
-outJ1C=cat(1,outJ1C{:});
-outJ2=cat(1,outJ2{:});
-
-outK=cat(1,outK{:});
-outL1=cat(1,outL1{:});
-outL2=cat(1,outL2{:});
+outGHIData=cat(1,outGHIData{:});
 % clear('outa','outb','outc','outd1','outd2','oute1','oute2','outf','outgh','outghi','outj1','outj1C','outj2','outk','outl1','outl2','i','MPath','FPath');
 clear('mappingMethod','minIDT','WinK','WinL','Cperiod','Entry','stEntry','nAll','SLinesMap','SLines');
-save([EXP,'\resV2.mat'],"int","outA","outB","outC","outD1","outD2","outE1","outE2","outF","outGHI","outJ1","outJ1C","outJ2","outJ3","outK","outL1","outL2");
+save([EXP,'\resV2simp.mat'],"int","outA","outAData","outGHI","outGHIData");
 end
 
-function [outA,outB,outC,outD1,outD2,outE1,outE2,outF,outGHI, outGHI2,outJ1,outJ1Cell,outJ2,outJ3,outK,outL1,outL2]=genResult0611(MPath,FPath,SchN,mapMet,Cperiod,int,minIDT,WindowK,WindowL)
+function [outA,outAData,outGHI,outGHIData]=genResult0611(MPath,FPath,SchN,mapMet,Cperiod,int,minIDT,WindowK,WindowL)
 %% core - ini
 load(FPath,'SLinesparts','SLinesMap','SLines');
 load(MPath,'Infcellv2','lxg','PHparts','PHLines','PHMap');
@@ -310,10 +282,13 @@ divNumByGen=getDivNum4SLinesByGen(selSptMap,selSpotLines,CIDinParts,HorLineMap,S
 % Col.18-19: [closest Ld/gen_m, gen_m] (Upon Chenli request)
 % Col.20-21: [Lt, gen_t] real cell length at termination, generation number for Lt.@23.12.07
 % Col.22-24: [t_start,t_end_U,t_end_L] Frame number for each spot line
-outA=[];
-%test=[];
+outA=nan(size(selSptMap,1),24);
+outAData=cell(size(selSptMap,1),2);
+outAMap=nan(size(selSptMap,1),3);
 for i=1:size(selSptMap,1)%for each spot line:
     col=nan(1,24);
+    colData=cell(1,2);
+    colMap=cell(1,2);
     if ~isnan(selSptMap(i,1)) || ~isnan(selSptMap(i,2))
         CIDm=selSpotLines{i,1}(1,2:3);%mother's initial CID (frame+CID).
         if CIDm(1)==1
@@ -321,7 +296,7 @@ for i=1:size(selSptMap,1)%for each spot line:
         end
         col(1)=InfCell{CIDm(1),1}{1,2}(CIDm(2),2)/oriNummat(CIDm(2),CIDm(1));   %Li/ori_m.
         col(4)=InfCell{CIDm(1),1}{1,2}(CIDm(2),2)/divNumByGen(i);               %Li/gen_m.
-
+        
         if ~isnan(selSptMap(i,1))
             CIDdup=selSpotLines{selSptMap(i,1),1}(1,2:3);
             curInitCycCIDup=oriLines{i,1};
@@ -329,10 +304,11 @@ for i=1:size(selSptMap,1)%for each spot line:
                 col(2)=(InfCell{CIDdup(1),1}{1,2}(CIDdup(2),2)/oriNummat(CIDdup(2),CIDdup(1)))*2-col(1);    %Δii_U(by ori)
                 col(5)=(InfCell{CIDdup(1),1}{1,2}(CIDdup(2),2)/divNumByGen(selSptMap(i,1)))*2-col(4);       %Δii_U(by gen)
             end
-            [col(7),~]=getGRthrSpotLine(curInitCycCIDup,InfCell,CIDinParts,int);    %GR of upper ori
+            [col(7),LsRaw1]=getGRthrSpotLine(curInitCycCIDup,InfCell,CIDinParts,int);    %GR of upper ori
             col(10)=selSpotLines{selSptMap(i,1),1}(1,2)-selSpotLines{i,1}(1,2);     %Tii_U (unit:Frm)
             col(22)=CIDm(1);           %starting frame of current spot line
             col(23)=CIDdup(1)-1;       %ending frame of upper oriLine
+            colData{1}=[LsRaw1/divNumByGen(i);col(5)+col(4)];
         end
         if ~isnan(selSptMap(i,2))
             CIDdlow=selSpotLines{selSptMap(i,2),1}(1,2:3);
@@ -341,10 +317,11 @@ for i=1:size(selSptMap,1)%for each spot line:
                 col(3)=(InfCell{CIDdlow(1),1}{1,2}(CIDdlow(2),2)/oriNummat(CIDdlow(2),CIDdlow(1)))*2-col(1); %Δii_L(by ori)
                 col(6)=(InfCell{CIDdlow(1),1}{1,2}(CIDdlow(2),2)/divNumByGen(selSptMap(i,2)))*2-col(4);      %Δii_L(by gen)
             end
-            [col(8),~]=getGRthrSpotLine(curInitCycCIDlow,InfCell,CIDinParts,int);   %GR of upper ori
+            [col(8),LsRaw2]=getGRthrSpotLine(curInitCycCIDlow,InfCell,CIDinParts,int);   %GR of upper ori
             col(11)=selSpotLines{selSptMap(i,2),1}(1,2)-selSpotLines{i,1}(1,2);     %Tii_U (unit:Frm)
             col(22)=CIDm(1);           %starting frame of current spot line
             col(24)=CIDdlow(1)-1;      %ending frame of lower oriLine
+            colData{2}=[LsRaw2/divNumByGen(i);col(6)+col(4)];
         end
         if ~isnan(selSptMap(i,1)) && ~isnan(selSptMap(i,2))%the current spot line has two descendants
             col(12)=int*(selSpotLines{selSptMap(i,1),1}(1,2)-selSpotLines{selSptMap(i,2),1}(1,2));%Δt in min. (T_initUp-T_initLow)
@@ -376,136 +353,24 @@ for i=1:size(selSptMap,1)%for each spot line:
         end
     end
     if sum(isnan(col))~=11
-        outA=cat(1,outA,col);
+        outA(i,:)=col;
+        outAData(i,:)=colData;
+        outAMap(i,:)=[i,selSptMap(i,:)];
+        % outA=cat(1,outA,col);
+        % outAData=cat(1,outAData,colData);
+        % outAMap=cat(1,outAMap,colMap);
     end
 end
 
 % ----- output B: %format:[idx, DNAc, L, NCR, DNAc/ori, L/ori];
-outB={};
-rng=4;  % Was 5. rng is an arbitary number that set a window before and after the starting point of a spot line. Too big rng value 
-        % may extend the window to next division cyclc. Choose smaller value (eg 3) when IDT value is small in frame.
-for iSp=1:length(selSpotLines)%for each replication initiation, calculate the parameters before and after initiation.
-    if isnan(full_selSptMap(iSp,1)) || size(selSpotLines{iSp,1},1)<=rng
-        continue;
-    end
-    CID1=selSpotLines{iSp,1}(1,2:3);% starting CID of this spot line
-    CID2=selSpotLines{iSp,1}(1+rng,2:3);% ending CID of this spot line
-    idx1=find(cellfun(@(x) ~isempty(find(x(:,1)==CID1(1) & x(:,2)==CID1(2), 1)),CIDinParts));%the starting CID belongs to which CIDpart?
-    idx2=find(cellfun(@(x) ~isempty(find(x(:,1)==CID2(1) & x(:,2)==CID2(2), 1)),CIDinParts));%the ending CID belongs to which CIDpart?
-    idx0=HorLineMap(idx1,1);%mother PH line of the PH line where the starting CID is in.
-    if isempty(idx1); continue;end
-    stidx1=find(CIDinParts{idx1,1}(:,1)==CID1(1) & CIDinParts{idx1,1}(:,2)==CID1(2),1);%where does the spot line start in the CIDpart?
-    if stidx1<=rng
-        if idx0~=0 && length(CIDinParts{idx0,1})>rng
-            p1=[CIDinParts{idx0,1}(end-(rng-stidx1)-1:end,:);...
-                CIDinParts{idx1,1}(1:stidx1,:)];
-        else
-            p1=CIDinParts{idx1,1}(1:stidx1-1,:);
-        end
-    else
-        p1=CIDinParts{idx1,1}((stidx1-rng):stidx1-1,:);
-    end
-
-    if idx2~=idx1
-        p2=[CIDinParts{idx1,1}(stidx1:end,:);
-        CIDinParts{idx2,1}(1:(rng-(size(CIDinParts{idx1,1},1)-stidx1)),:)];
-    else
-        p2=CIDinParts{idx1,1}(stidx1:stidx1+rng,:);
-    end
-
-    out=getInfoByCID([p1;p2],actualDNAmat,InfCell,oriNummat);
-    outB=[outB;{[[(fliplr(-1*(1:1:size(p1,1))))';(0:1:size(p2,1)-1)'],out]}];
-end
-
 % ----- output C: for each div, DNA content vs divSite:  Δ(divSite) vs Δ(DNAcont)
-outC=[];
-%[curRow,curCol]=find(cellfun(@(x) length(x)==2, lxg));
-idxC=find(~isnan(HorLineMap(:,2)) & ~isnan(HorLineMap(:,3)));
-for iDiv=1:length(idxC)
-    %Lm=InfCell{CIDinParts{idxC(iDiv)}(end,1)}{1,2}(CIDinParts{idxC(iDiv)}(end,2),2);
-    DuFrm=CIDinParts{HorLineMap(idxC(iDiv),2)}(1,1);% upper daughter Frame
-    DuCid=CIDinParts{HorLineMap(idxC(iDiv),2)}(1,2);% upper daughter CID
-    DlFrm=CIDinParts{HorLineMap(idxC(iDiv),3)}(1,1);% lower daughter Frame
-    DlCid=CIDinParts{HorLineMap(idxC(iDiv),3)}(1,2);% lower daughter CID
-    Ldu=InfCell{DuFrm}{1,2}(DuCid,2);
-    Ldl=InfCell{DlFrm}{1,2}(DlCid,2);
-    outCT=[Ldu,actualDNAmat(DuCid,DuFrm),Ldl,actualDNAmat(DlCid,DlFrm)];%outCT format: [Ldu, DNACu, Ldl, DNACl]
-    outC=cat(1,outC,[(outCT(1)-outCT(3))/(outCT(1)+outCT(3)),(outCT(2)-outCT(4))/(outCT(2)+outCT(4))]);
-end
-
 % ----- output D: NCratio (2D) and 1D 
-NCratiomat=nan(size(actualDNAmat));
-[curRow,curCol]=find(~isnan(actualDNAmat));
-outD1=nan(size(curRow,1),2);
-outD2={};
-for iNC=1:size(curRow,1)% for each CID that can calculate NCR
-    outD1(iNC,:)=[actualDNAmat(curRow(iNC),curCol(iNC)),InfCell{curCol(iNC),1}{1,2}(curRow(iNC),2)];
-    NCratiomat(curRow(iNC),curCol(iNC))=actualDNAmat(curRow(iNC),curCol(iNC))/InfCell{curCol(iNC),1}{1,2}(curRow(iNC),2);%total DNA cont/Cell Length
-end
-
-for iDiv=1:length(CIDinParts)% for each division cycle. Time-series:[NCR, DNAc, L, GRofEntireDivCyc] NOTE: removing incompleted div cycles.
-    if isnan(HorLineMap(iDiv,2)) && isnan(HorLineMap(iDiv,3)) 
-        continue;
-    end
-    if iDiv==1
-        continue;
-    end
-    CIDs=CIDinParts{iDiv,1};
-    outd=nan(size(CIDs,1),3);
-    for iCID=1:size(CIDs,1)
-        if CIDs(iCID,1)<=size(NCratiomat,2)
-            outd(iCID,:)=[NCratiomat(CIDs(iCID,2),CIDs(iCID,1)),...
-                actualDNAmat(CIDs(iCID,2),CIDs(iCID,1)),...
-                InfCell{CIDs(iCID,1),1}{1,2}(CIDs(iCID,2),2)];
-        end
-    end
-    
-    outd(isnan(outd))=[];
-%     x=(1:1:length(outd(:,3)))'*int/60;
-%     y=outd(:,3);
-    [f,~] = fit((1:1:length(outd(:,3)))'*int/60,outd(:,3),'exp1');
-    outd=[outd,f.b*ones(size(outd,1),1)];
-    outD2=[outD2;{outd}];
-end
-
 % ----- output E -OK
-%   1. DNA content at birth vs GR of divCyc;
-%   2. NCratio vs GR of divCyc
-%   3. DNA content vs SpeGR
-%   4. NCratio vs SpeGR
-%output1: [DNA content at birth, NCratio at birth, GR]
-%output2: {[DNA content, NCratio, SpeGR]}
-[outE1,outE2]=getPHPartData(CIDinParts,HorLineMap,InfCell,NCratiomat,actualDNAmat,int,minIDT/int);
-
-
 % ----- output F -OK
-%   1. NCratio at init vs inter-init-time (IIT)
-%   2. NCratio at init vs C(original Cperiod)
-%   3. NCratio at init vs GR
-%output: [NCR@init, avgNCR, IM/ori, DNAc@init/ori, DNAc@init, IIT1, IIT2, rawCperiod, GRthrcurSpotLine]
-outF=[];
-for iSp=1:length(selSpotLines)
-    if isnan(full_selSptMap(iSp,1)) || isnan(full_selSptMap(iSp,2)) || isnan(full_selSptMap(iSp,3))
-        continue;
-    end
-    momIniFrm=selSpotLines{iSp,1}(1,2);
-    momIMCID=selSpotLines{iSp,1}(1,2:3);
-    momIM=InfCell{momIMCID(1),1}{1,2}(momIMCID(2),2)./oriNummat(momIMCID(2),momIMCID(1));
-    momDNAperOri=actualDNAmat(selSpotLines{iSp,1}(1,3),selSpotLines{iSp,1}(1,2))./oriNummat(momIMCID(2),momIMCID(1));
-    daugIniFrm1=selSpotLines{full_selSptMap(iSp,2),1}(1,2);
-    daugIniFrm2=selSpotLines{full_selSptMap(iSp,3),1}(1,2);
-    rawCperiod=size(selSpotLines{iSp,1},1);
-    [GR_curSpotLine,~]=getGRthrSpotLine(selSpotLines{iSp,1}(:,2:3),InfCell,CIDinParts,int);
-    meanNCR=getMeanNCRatiothrSpotLine(selSpotLines{iSp,1}(:,2:3),NCratiomat);
-    %meanDNAC=getMeanDNACthrSpotLine(selSpotLines{iSp,1}(:,2:3),actualDNAmat);
-    outF=cat(1,outF,[NCratiomat(selSpotLines{iSp,1}(1,3),selSpotLines{iSp,1}(1,2)),meanNCR, ...
-        momIM,momDNAperOri,actualDNAmat(selSpotLines{iSp,1}(1,3),selSpotLines{iSp,1}(1,2)),...
-        daugIniFrm1-momIniFrm,...
-        daugIniFrm2-momIniFrm,rawCperiod,GR_curSpotLine]);
-end
-
 % ----- output GHI C+D related things
 outGHI=nan(size(Spt2PHMap,1),17); 
+outGHIData=cell(size(Spt2PHMap,1),1);
+% outGHIMap=nan(size(Spt2PHMap,1),3);
 % Format of outputGHI: 
 % Col. 1~6: [C+D(frm), rawC, Li, B-period, Li/genN, Ld]. (Note: Col.4 is now B(frm))
 % Col. 7-11:[ori number at division,lambda*(C+D),lambda,Li*Rat,Ti].
@@ -538,7 +403,7 @@ for i=1:size(Spt2PHMap,1)%for each spot line
         startCIDofCorrPHpart=CIDinParts{Spt2PHMap(i,1),1}(1,:);%starting CID of the corresponding PH part.
         if isequal(startCIDofCorrPHpart,[1,1]);startCIDofCorrPHpart=nan(1,2);end
         [CIDcd,~]=extractCIDsBtwAB(selSpotLines{i,1}(1,2:3),lastCID,CIDinParts,HorLineMap);
-        [lambda,~]=getGRthrSpotLine([selSpotLines{i,1}(1,2:3);CIDcd;lastCID],InfCell,CIDinParts,int);
+        [lambda,LsGHI]=getGRthrSpotLine([selSpotLines{i,1}(1,2:3);CIDcd;lastCID],InfCell,CIDinParts,int);
         [idxLine,~]=find(HorLineMap(:,2:3)==Spt2PHMap(i,1));
         if HorLineMap(idxLine,1)~=0
             prevCID=CIDinParts{idxLine}(end,:);
@@ -563,62 +428,36 @@ for i=1:size(Spt2PHMap,1)%for each spot line
             prevLd,...%15. previous Ld
             startCID(1),lastCID(1)];%16-17. Starting and ending frame of this ID.
         outGHI(i,:)=uix;
+        outGHIData{i}=[LsGHI*prod(divRats);Ld];
+        % outGHIMap(i,:)=[i,Spt2PHMap(i,:)];
     else
         del=[del;i];
     end
 end
+
+delA=isnan(outA(:,1));
+delR=isnan(outAMap);
+outAMap=arrayfun(@(x) ['P',num2str(SchN(1),'%0.2i'),'S',num2str(SchN(2),'%0.2i'),'N',num2str(x,'%0.2i')], outAMap,'UniformOutput',false);
+outAMap(delR)={''};
+outGHIMap=outAMap;
+outAMap(delA,:)=[];
+outAData(delA,:)=[];
+outA(delA,:)=[];
+outAData=[outAMap,outAData];
+
 outGHI(del,:)=[];
-outGHI2=nan(size(outGHI,1),6);%[mom_lb,mom_li_raw,mom_rat,mon_ld, daug_lb, daug_li_raw, daug_rat, daug_ld]
-for iSL=2:size(outGHI,1)%from 2 intentionally
-    if ~ismember(iSL,outGHI(:,12))
-        continue;
-    end
-% 
-%     if isnan(selSptMap(iSL,1)) && isnan(selSptMap(iSL,2))
-%         continue;
-%     end
-    if ~isnan(selSptMap(iSL,1))
-       if ismember(selSptMap(iSL,1),outGHI(:,12)) 
-            outGHI2(iSL,1:4)=outGHI(outGHI(:,12)==iSL,[13,3,10,6]);
-            outGHI2(iSL,5:8)=outGHI(outGHI(:,12)==selSptMap(iSL,1),[13,3,10,6]);
-       end
-    end
-    if ~isnan(selSptMap(iSL,2))
-       if ismember(selSptMap(iSL,2),outGHI(:,12)) 
-            outGHI2(iSL,1:4)=outGHI(outGHI(:,12)==iSL,[13,3,10,6]);
-            outGHI2(iSL,5:8)=outGHI(outGHI(:,12)==selSptMap(iSL,2),[13,3,10,6]);
-       end
-    end
-end
-outGHI2(isnan(outGHI2(:,1)),:)=[];
-
-
+outGHIData(del,:)=[];
+outGHIMap(del,:)=[];
+outGHIData=[outGHIMap,outGHIData];
 % ----- output J ori fire in div cyc.
 % outJ1=[]; %format:see below.
 % outJ2={}; %format:see below.
 %[outJ1, outJ1Cell, outJ2]=outputtingJ(oriLines, oriMap, CIDinParts,HorLineMap,selSpotLines,full_selSptMap);
-[outJ1, outJ1Cell, outJ2, outJ3]=outputtingJ(oriLines, oriMap, CIDinParts,HorLineMap);
 %format of outJ1: [enterOriC number, init 0 number percentage, init once number percentage, ...2%, ...3% ]
 %format of outJ2: [PHidxOfMomPHpart, NumOfFiringInMomPHpart, PHidxOfCurPHpart, NumOfFiringInCurPHpart]
-
 % ----- output K Moving Window NCR: [NCR, T2nI, T2nD]
 % ----- output L NCR before div and init: NCRDiv and NCRInit (N x Window double)
-for i=2:size(HorLineMap,1)%For each div cycle: start from 2 intentionally:<-----------change back to 2.
-    CIDinit=cell2mat(cellfun(@(x) x(1,2:3), selSpotLines,'UniformOutput',false));
-    CIDinit=unique(CIDinit,'rows');
-    outK=outputtingK_edge(HorLineMap,CIDinParts,CIDinit,NCratiomat,WindowK);%In: PHMap,PHLines,CIDinit,NCRmat,win. Out:[NCR, T2nI, T2nD]
-    idxK=isnan(outK(:,2)) | isnan(outK(:,3)) ;
-    outK(idxK,:)=[];
-    [outL1,outL2]=outputtingL(HorLineMap,CIDinParts,CIDinit,NCratiomat,WindowL);%In: PHMap,PHLines,CIDinit,NCRmat,win. Out:[NCRDiv,NCRInit] (N x Window double)
-end%For each div cycle
-clear('idx1','idx2');
 
-%clear up unnecessary things.
-%E:
-del=find(cellfun(@(x) isempty(x), outE2));
-del=unique([del;find(outE1(:,1)<=0)]);
-outE1(del,:)=[];
-outE2(del)=[];
 end
 %% nested function
 function [DivNum]=getDivNum4SLinesByGen(SptMap,SLines,PHLines,PHMap,S2Pmap)
@@ -669,7 +508,7 @@ if ~isempty(uit)
     uit(1)=[];
 end
 end
-function [uit,cnt]=getGRthrSpotLine(CIDin,InfCell,CIDinParts,int)
+function [uit,Ls]=getGRthrSpotLine(CIDin,InfCell,CIDinParts,int)
 uit=[];
 Ls=nan(size(CIDin,1),1);
 idx=find(cellfun(@(x) ~isempty(find(x(:,1)==CIDin(1,1) & x(:,2)==CIDin(1,2),1)), CIDinParts));
