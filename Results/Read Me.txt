@@ -1,0 +1,1 @@
+Each xlsx file contains data for calculating II-, DD- and ID-adder. In each sheet, every row is cell length in one cycle. The first 3 columns are current cycle ID and the two daughter-cycle IDs.

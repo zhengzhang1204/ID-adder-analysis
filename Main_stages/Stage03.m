@@ -8,17 +8,17 @@ clc;
 
 %% User specified region
 % Option 1: process a specified experiment
-% EXP='F:\RdnaA-seqAR-atc 1to3-M30 medium 20260130';int=3;WinK=3;WinL=10;%
-% Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL);
+EXP='G:\RdnaA-seqAR-atc 1to3-M30 medium 20260130';int=3;WinK=3;WinL=10;%
+Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL);
 
 % Option 2: process a list of experiments
-WinK=4;WinL=3;
-load('G:\mChrRpath.mat');
-path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
-int=cell2mat(Rpath(:,3));
-for i=1:length(path)%for each experiment
-    Stg3Neo_outs_with_closest_LdCore(path{i},int(i),WinK,WinL);
-end
+% WinK=4;WinL=3;
+% load('G:\mChrRpath.mat');
+% path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
+% int=cell2mat(Rpath(:,3));
+% for i=1:length(path)%for each experiment
+%     Stg3Neo_outs_with_closest_LdCore(path{i},int(i),WinK,WinL);
+% end
 
 %% Core function starts here.
 function []=Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL)
