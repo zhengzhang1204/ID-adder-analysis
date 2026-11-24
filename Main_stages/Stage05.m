@@ -4,7 +4,7 @@ clc;
 close('all');
 
 %% User specified region
-inDir='D:\mChr_RescaleL260224';
+inDir='D:\mChr_RescaleL260521_FM13';
 
 %% Stills:
 nSD=3;
@@ -17,7 +17,7 @@ isExample1K=true;
 
 %% codes start here:
 F=dir([inDir,'\*.mat']);
-[~,idx]=sort(cellfun(@(x) str2double(extractBetween(x,'M','_data.mat')),{F.name}),'ascend');
+[~,idx]=sort(cellfun(@(x) str2double(extractBetween(x,'M','_data.mat')),{F.name}),'ascend');%<------
 F=F(idx);
 mediaID=cellfun(@(x) extractBefore(x,'_data.mat'),{F.name},'UniformOutput',false);
 outMat=zeros(length(F),269);

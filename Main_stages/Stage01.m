@@ -1,18 +1,17 @@
 cllc;
 
-Source='G:\20250214_AC2_M13_4min';
-Target='E:\20250214_AC2_M13_4minProc';
+Source='G:\000000rawTest';
+Target='E:\000000rawTest';
 Channels={'M','Y'};             %'M': brightfield or PH, 'Y': spots, 'R': hupA-mChr
-interval=1;int=4;   %
-ValidFrame=[1, 5];            %Valid frames. Put empty([]) if all frames are valid.
-ValidPos=[4];isPosStartFrom0=false;        %Valid positions. If from Fov_00, ValidPos=10 means processing Fov_10, generating P11.
+interval=1;int=3;   %
+ValidFrame=[];            %Valid frames. Put empty([]) if all frames are valid.
+ValidPos=[];isPosStartFrom0=false;        %Valid positions. If from Fov_00, ValidPos=10 means processing Fov_10, generating P11.
 
-narrow.isNarrowChn=true; narrow.width=44; narrow.restoreOffset=-2; narrow.optimMethod=1;   %By Stg0Neo_test_DL_width.m
-isRotate=true; rotateAngle=-0.2; %By imageJ, add '-' to the rotation degree in ImageJ if mouths are up. Add nothing to the degree if mouths are down.
-isFacingDown=false;                 %set to 0 if the side channels are facing upwards. Need to automatically shift up side down if true.
+narrow.isNarrowChn=true; narrow.width=46; narrow.restoreOffset=-2; narrow.optimMethod=1;   %By Stg0Neo_test_DL_width.m
+isRotate=true; rotateAngle=90.2; %By imageJ, add '-' to the rotation degree in ImageJ if mouths are up. Add nothing to the degree if mouths are down.
 isUseGPU=false;
-isWarp=true;     %is channel shifted?
-XcrsShift=103;                  %By Stg0Neo_test_DL_width.m
+isWarp=false;     %is channel shifted?
+XcrsShift=67;                  %By Stg0Neo_test_DL_width.m
 FromStage=0;%debugging only
 
 % %-----JinMicroscope only-----(seqAmChr used this)
@@ -45,11 +44,8 @@ majorL=14;
 if FromStage<=0%<----change this back to 1
     mkdir(strcat(Target,'\temp'));
     type=DL_validateFileFormatv2(Source,JinName);
-    if type==1; DL_InitDirAndFileList_NIS(Source,Target,Channels,ValidFrame,ValidPos,isRotate,rotateAngle,isFacingDown);%-tested OK
-    elseif type==2 || type==3; DL_InitDirAndFileList_CPatHuangV2(Source,Target,Channels,ValidFrame,ValidPos,JinName,isRotate,rotateAngle,isFacingDown,interval,isPosStartFrom0);
-%     elseif type==3
-%         JinName={'fov',{'phase','t'},{'YFP','t'},0};
-%         DL_InitDirAndFileList_CPatHuang(Source,Target,Channels,ValidFrame,ValidPos,JinName,isRotate,rotateAngle,isFacingDown,interval,isPosStartFrom0);%-tested OK
+    if type==1; DL_InitDirAndFileList_NIS(Source,Target,Channels,ValidFrame,ValidPos,isRotate,rotateAngle);%-tested OK
+    elseif type==2 || type==3; DL_InitDirAndFileList_CPatHuangV2(Source,Target,Channels,ValidFrame,ValidPos,JinName,isRotate,rotateAngle,interval,isPosStartFrom0);
     else; error('Unrecognized file format');
     end
 end
@@ -74,7 +70,7 @@ clear('JinName*');
 
 if isRotate
     load([Target,'\temp\rot.mat']);
-    prm=rot.prm;RotDeg=rot.deg;isInv=rot.isMouthDown;
+    prm=rot.prm;RotDeg=rot.deg;
 end
 Core=imread(TwoDNXCloc);
 if size(Core,2)>(prm(4)-prm(3)+1)
@@ -153,8 +149,6 @@ for iPos=1:length(ValidPos)%for each valid position
     tK3=toc;
     disp(['5. p',num2str(ValidPos(iPos),'%0.2i'),' is saved to Y_res in ',num2str(tK3,'%0.2f'),' seconds']);
 end
-
-
 
 
 %% Nested functions.

@@ -1,1 +1,2 @@
-Each xlsx file contains data for calculating II-, DD- and ID-adder. In each sheet, every row is cell length in one cycle. The first 3 columns are current cycle ID and the two daughter-cycle IDs.
+Each xlsx file contains data for calculating II-, DD- and ID-adder. In each sheet, every row is cell length in one cycle. The first 3 columns are current cycle ID and the two daughter-cycle IDs. Notably, each row in 'II-adder' contains two cycles, corresponding to the two newly formed origins. 
+In the two DnaA upshift assays, medium shift was performed at 1632 min in Experiment 260301, and at 1683 min in Experiment 260622.

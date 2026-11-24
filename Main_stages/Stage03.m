@@ -8,20 +8,19 @@ clc;
 
 %% User specified region
 % Option 1: process a specified experiment
-EXP='G:\RdnaA-seqAR-atc 1to3-M30 medium 20260130';int=3;WinK=3;WinL=10;%
-Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL);
+% EXP='G:\20260301_RdnaA-DnaNyPet-atc_1to5';int=3;% ; 20260622_M30_atc1to5 ; 20260301_RdnaA-DnaNyPet-atc_1to5
+% Stg3Neo_outs_with_closest_LdCore(EXP,int);
 
 % Option 2: process a list of experiments
-% WinK=4;WinL=3;
-% load('G:\mChrRpath.mat');
-% path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
-% int=cell2mat(Rpath(:,3));
-% for i=1:length(path)%for each experiment
-%     Stg3Neo_outs_with_closest_LdCore(path{i},int(i),WinK,WinL);
-% end
+load('G:\mChrRpath10.mat');
+path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
+int=cell2mat(Rpath(:,3));
+for i=1:length(path)%for each experiment
+    Stg3Neo_outs_with_closest_LdCore(path{i},int(i));
+end
 
 %% Core function starts here.
-function []=Stg3Neo_outs_with_closest_LdCore(EXP,int,WinK,WinL)
+function []=Stg3Neo_outs_with_closest_LdCore(EXP,int)
 
 %WinK=2;%Unit is frame. Consider fast growth[5 min], slow growth [10 min]
 %WinL=15;%Unit is frame. Consider fast growth[20-30 min]; slow is [75 min]
@@ -29,7 +28,7 @@ Cperiod=48;%unit frame C=48min for M18
 % % int=5;%1 for fast growth, 5 for slow growth.
 minIDT=20;  %unit: min. 10 for fast growth RDM+GLY
             %  20-30 for slow growth MOPS+GLU
-mappingMethod=5;    %[4] fast growth
+mappingMethod=4;    %[4] fast growth
                     %[5] slow growth<-was always here
 stEntry=1;
 
@@ -65,7 +64,7 @@ parfor i=1:size(data,1)%parfor each entry
     FPath=[EXP,'\Y_res\p',num2str(data(i,1),'%0.2i'),'_lkgY.mat'];
     disp(['Processing ',num2str(Entry(i)),'/',nAll]);
     try
-        [outA{i},outAData{i},outGHI{i},outGHIData{i}]=genResult0611(MPath,FPath,data(i,:),mappingMethod,round(Cperiod/int),int,minIDT,WinK,WinL);
+        [outA{i},outAData{i},outGHI{i},outGHIData{i}]=genResult0611(MPath,FPath,data(i,:),mappingMethod,round(Cperiod/int),int,minIDT);
     catch
         disp(['P',num2str(data(i,1),'%0.2i'),'S',num2str(data(i,2),'%0.2i')]);
     end
@@ -79,7 +78,7 @@ clear('mappingMethod','minIDT','WinK','WinL','Cperiod','Entry','stEntry','nAll',
 save([EXP,'\resV2simp.mat'],"int","outA","outAData","outGHI","outGHIData");
 end
 
-function [outA,outAData,outGHI,outGHIData]=genResult0611(MPath,FPath,SchN,mapMet,Cperiod,int,minIDT,WindowK,WindowL)
+function [outA,outAData,outGHI,outGHIData]=genResult0611(MPath,FPath,SchN,mapMet,Cperiod,int,minIDT)
 %% core - ini
 load(FPath,'SLinesparts','SLinesMap','SLines');
 load(MPath,'Infcellv2','lxg','PHparts','PHLines','PHMap');
@@ -307,12 +306,12 @@ for i=1:size(selSptMap,1)%for each spot line:
             [col(7),LsRaw1]=getGRthrSpotLine(curInitCycCIDup,InfCell,CIDinParts,int);    %GR of upper ori
             col(10)=selSpotLines{selSptMap(i,1),1}(1,2)-selSpotLines{i,1}(1,2);     %Tii_U (unit:Frm)
             col(22)=CIDm(1);           %starting frame of current spot line
-            col(23)=CIDdup(1)-1;       %ending frame of upper oriLine
+            col(23)=CIDdup(1);         %ending frame of upper oriLine
             colData{1}=[LsRaw1/divNumByGen(i);col(5)+col(4)];
         end
         if ~isnan(selSptMap(i,2))
             CIDdlow=selSpotLines{selSptMap(i,2),1}(1,2:3);
-            curInitCycCIDlow=oriLines{i,1};
+            curInitCycCIDlow=oriLines{i,2};
             if CIDdlow(2)<=size(InfCell{CIDdlow(1),1}{1,2},1)
                 col(3)=(InfCell{CIDdlow(1),1}{1,2}(CIDdlow(2),2)/oriNummat(CIDdlow(2),CIDdlow(1)))*2-col(1); %Δii_L(by ori)
                 col(6)=(InfCell{CIDdlow(1),1}{1,2}(CIDdlow(2),2)/divNumByGen(selSptMap(i,2)))*2-col(4);      %Δii_L(by gen)
@@ -320,7 +319,7 @@ for i=1:size(selSptMap,1)%for each spot line:
             [col(8),LsRaw2]=getGRthrSpotLine(curInitCycCIDlow,InfCell,CIDinParts,int);   %GR of upper ori
             col(11)=selSpotLines{selSptMap(i,2),1}(1,2)-selSpotLines{i,1}(1,2);     %Tii_U (unit:Frm)
             col(22)=CIDm(1);           %starting frame of current spot line
-            col(24)=CIDdlow(1)-1;      %ending frame of lower oriLine
+            col(24)=CIDdlow(1);        %ending frame of lower oriLine
             colData{2}=[LsRaw2/divNumByGen(i);col(6)+col(4)];
         end
         if ~isnan(selSptMap(i,1)) && ~isnan(selSptMap(i,2))%the current spot line has two descendants
@@ -403,7 +402,8 @@ for i=1:size(Spt2PHMap,1)%for each spot line
         startCIDofCorrPHpart=CIDinParts{Spt2PHMap(i,1),1}(1,:);%starting CID of the corresponding PH part.
         if isequal(startCIDofCorrPHpart,[1,1]);startCIDofCorrPHpart=nan(1,2);end
         [CIDcd,~]=extractCIDsBtwAB(selSpotLines{i,1}(1,2:3),lastCID,CIDinParts,HorLineMap);
-        [lambda,LsGHI]=getGRthrSpotLine([selSpotLines{i,1}(1,2:3);CIDcd;lastCID],InfCell,CIDinParts,int);
+        [lambdaID,LsGHI]=getGRthrSpotLine([selSpotLines{i,1}(1,2:3);CIDcd;lastCID],InfCell,CIDinParts,int);
+        
         [idxLine,~]=find(HorLineMap(:,2:3)==Spt2PHMap(i,1));
         if HorLineMap(idxLine,1)~=0
             prevCID=CIDinParts{idxLine}(end,:);
@@ -412,6 +412,7 @@ for i=1:size(Spt2PHMap,1)%for each spot line
             prevLd=nan;
         end
         Ld=InfCell{daugCIDs(1,1),1}{1,2}(daugCIDs(1,2),2)+InfCell{daugCIDs(2,1),1}{1,2}(daugCIDs(2,2),2);% upgraded
+        lambdaDD=getGRthrDD(CIDinParts{Spt2PHMap(i,1),1},InfCell,int,Ld);
         uix=[CD,...%1. C+D
             size(selSpotLines{i,1},1),...%2. rawC(frm)
             Li,...%3. Li
@@ -420,13 +421,13 @@ for i=1:size(Spt2PHMap,1)%for each spot line
             Li./divNumByGen(i)...%5. Li/genN
             Ld,...%6. Ld. was InfCell{lastCID(1),1}{1,2}(lastCID(2),2)
             oriNummat(lastCID(2),lastCID(1)),...%7. ori#@division
-            lambda*CD,lambda,...%8-9. lambda*(C+D), lambda(h-1)
+            lambdaID*CD,lambdaDD,...%8-9. lambda*(C+D), lambda(h-1)
             Li*prod(divRats),...%10. Li*Rats
             selSpotLines{i,1}(1,2),i,...%11-12. Ti, index of spotline in Spt2PHmap
             InfCell{CIDinParts{Spt2PHMap(i,1)}(1,1)}{1,2}(CIDinParts{Spt2PHMap(i,1)}(1,2),2),...%13. Lb of the corresponding division
             length(divRats),...%14. number of division during C+D,
             prevLd,...%15. previous Ld
-            startCID(1),lastCID(1)];%16-17. Starting and ending frame of this ID.
+            startCID(1),lastCID(1)+1];%16-17. Starting and ending frame of this ID.
         outGHI(i,:)=uix;
         outGHIData{i}=[LsGHI*prod(divRats);Ld];
         % outGHIMap(i,:)=[i,Spt2PHMap(i,:)];
@@ -459,7 +460,23 @@ outGHIData=[outGHIMap,outGHIData];
 % ----- output L NCR before div and init: NCRDiv and NCRInit (N x Window double)
 
 end
-%% nested function
+%% nested function:
+function [uit]=getGRthrDD(CIDs,InfCell,int,Ld)
+
+Ls=[arrayfun(@(x,y) InfCell{x,1}{1,2}(y,2),CIDs(:,1),CIDs(:,2));Ld];
+
+x=(1:1:length(Ls))'*int/60;
+if length(Ls)>=5
+    [f,~] = fit(x,Ls,'exp1');
+    uit=f.b;
+else
+    uit=nan;
+end
+
+end
+
+
+
 function [DivNum]=getDivNum4SLinesByGen(SptMap,SLines,PHLines,PHMap,S2Pmap)
 SptMap=fullizeMap(SptMap);
 initThread=find(isnan(SptMap(:,1)));

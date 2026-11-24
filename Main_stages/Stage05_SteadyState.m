@@ -1,29 +1,28 @@
 cllc;close('all');
 
 %% change here:
-% load('G:\mChrRpath.mat');
+% load('H:\mChrRpath.mat');
 % sel=[1:3,6,8,10,12:15];
 % Rpath=Rpath(sel,:);scl2=scl2(sel,:);
-load('G:\ATCpath3_seqA.mat');
+load('G:\ATCpath2.mat');
+
+ATCpath=[{'20260412_M18_RdnaA-DnaNyPet-atc_0.8'},{'atc0.8'},{3}];
+scl2(1,1)=300;scl2(2,1)=800;
 Rpath=ATCpath;
 path=cellfun(@(x,y) [x,y], repmat({'G:\'},size(Rpath,1),1),Rpath(:,1),'UniformOutput',false);
-exportDir='D:\mChr_RescaleL260206';%'D:\mChr_Rescale\';'D:\yPet_Rescale\'
-
-moveWinSize=180;%unit: Frm
-moveStep=100;%unit: Frm
-thr=70;%thr: minimum number of samples in each bin.
+exportDir='D:\mChr_RescaleL260409b';%'D:\mChr_Rescale\';'D:\yPet_Rescale\'
 
 for i=1:length(path)%<-----CHANGE THIS BACK TO 1
-    M=load([path{i},'\M_res\Tab_GRIDTADDERRv3.mat']);
-    Y=load([path{i},'\resV2.mat'],'outGHI');
+    M=load([path{i},'\M_res\Tab_GRIDTADDERRv3simp.mat']);
+    Y=load([path{i},'\resV2simp.mat'],'outGHI');
     int=Rpath{i,3};
-    li_ID=Y.outGHI(:,10)*0.065;
-    time_li_ID=Y.outGHI(:,16)*int;
+    li_ID=Y.outGHI(:,10)*0.065;             % Li
+    time_li_ID=Y.outGHI(:,16)*int;          % Time Li
 
-    lb_all=M.tab.BirthLength*0.065;               %Lb
-    ddd_all=M.tab.DivAdderByCombDaug*0.065;       %added dd
-    GR=M.tab.GR;                                    %GR
-    time_dd=M.tab.CycInitTime;                      %time for Lb, dd or GR (unit:min)
+    lb_all=M.tab.BirthLength*0.065;         % Lb
+    ddd_all=M.tab.DivAdderByCombDaug*0.065; % added dd
+    GR=M.tab.GR;                            % GR
+    time_dd=M.tab.CycInitTime;              % time for Lb, dd or GR (unit:min)
 
     drawFig250402(time_dd,GR,scl2(i,1:4),[exportDir,'\880\',Rpath{i,2},'_ss_GR.tif']);
     drawFig250402(time_dd,lb_all,scl2(i,[1,2,5,6]),[exportDir,'\880\',Rpath{i,2},'_ss_Lb.tif'])
@@ -37,7 +36,7 @@ function []=drawFig250402(t,y,scl,svPath)
 del=(t<scl(1) | t>scl(2));
 t(del)=[];y(del)=[];
 t=t-scl(1);
-
+% [t,y];
 % MX=max(t,[],'all');
 edges=0:50:diff(scl(1:2));
 [ctg, be]= discretize(t,edges);

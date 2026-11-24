@@ -1,20 +1,20 @@
 cllc;
 % Single mode:
-coreQC('F:\20260124 RdnaA_M30_atc1-3_dnaNyPet2',3,1);
+% coreQC('G:\20230601_WT_M25_seqAmChr',3,1);
 
 % Batch mode:
-% load('G:\mChrRpath.mat');
-% for iExp=1:size(Rpath,1)
-%     Exp=['G:\',Rpath{iExp,1}];
-%     int=Rpath{iExp,3};
-%     coreQC(Exp,int,iExp);
-% end
+load('G:\mChrRpath10.mat');
+for iExp=1:size(Rpath,1)
+    Exp=['G:\',Rpath{iExp,1}];
+    int=Rpath{iExp,3};
+    coreQC(Exp,int,iExp);
+end
 
 function []=coreQC(Exp,int,iexp)
 F=dir([Exp,'\M_res\p*_lkgM.mat']);
 GRIDTclt=cell(length(F),1);%GR,IDT,collector. Format: Pos, SChn, {Idx-Frame lineage}, {[idt, gr, gof, CycInitTime]}
 GRIDTData=cell(length(F),1);
-parfor i=1:length(F)%PARFOR each position, read its Mres.mat
+for i=1:length(F)%PARFOR each position, read its Mres.mat
 	M=load([F(i).folder,'\',F(i).name],'PHparts', 'Infcellv2', 'PHMap');
     % disp(['Processing P',F(i).name(2:3),'(',num2str(i,'%0.2i'),')...']);
     data=[];
